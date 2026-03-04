@@ -14,6 +14,7 @@ export type RouterOptions = {
   config: RoutingConfig;
   modelPricing: Map<string, ModelPricing>;
   routingProfile?: "free" | "eco" | "auto" | "premium";
+  hasTools?: boolean;
 };
 
 /**
@@ -56,14 +57,16 @@ export function route(
   } else {
     // Auto profile (or undefined): intelligent routing with agentic detection
     // Determine if agentic tiers should be used:
-    // 1. Explicit agenticMode config OR
-    // 2. Auto-detected agentic task (agenticScore >= 0.5, lowered for better multi-step detection)
+    // 1. Request contains tools (OpenClaw/agentic clients always send tools) OR
+    // 2. Explicit agenticMode config OR
+    // 3. Auto-detected agentic task (agenticScore >= 0.5)
     const agenticScore = ruleResult.agenticScore ?? 0;
     const isAutoAgentic = agenticScore >= 0.5;
     const isExplicitAgentic = config.overrides.agenticMode ?? false;
-    const useAgenticTiers = (isAutoAgentic || isExplicitAgentic) && config.agenticTiers != null;
+    const hasToolsInRequest = options.hasTools ?? false;
+    const useAgenticTiers = (hasToolsInRequest || isAutoAgentic || isExplicitAgentic) && config.agenticTiers != null;
     tierConfigs = useAgenticTiers ? config.agenticTiers! : config.tiers;
-    profileSuffix = useAgenticTiers ? " | agentic" : "";
+    profileSuffix = useAgenticTiers ? ` | agentic${hasToolsInRequest ? " (tools)" : ""}` : "";
   }
 
   const agenticScoreValue = ruleResult.agenticScore;

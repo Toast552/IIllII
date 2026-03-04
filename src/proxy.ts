@@ -2259,13 +2259,12 @@ async function proxyRequest(
           const systemPrompt =
             typeof systemMsg?.content === "string" ? systemMsg.content : undefined;
 
-          // Tool detection (must run regardless of session state for fallback chain filtering)
-          // Agentic mode is triggered by keyword-based detection (agenticScore >= 0.6)
+          // Tool detection — when tools are present, force agentic tiers for reliable tool use
           const tools = parsed.tools as unknown[] | undefined;
           hasTools = Array.isArray(tools) && tools.length > 0;
 
           if (hasTools && tools) {
-            console.log(`[ClawRouter] Tools detected (${tools.length}), agentic mode via keywords`);
+            console.log(`[ClawRouter] Tools detected (${tools.length}), forcing agentic tiers`);
           }
 
           // Vision detection: scan messages for image_url content parts
@@ -2283,6 +2282,7 @@ async function proxyRequest(
           routingDecision = route(prompt, systemPrompt, maxTokens, {
             ...routerOpts,
             routingProfile: routingProfile ?? undefined,
+            hasTools,
           });
 
           if (existingSession) {
