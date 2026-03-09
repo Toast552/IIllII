@@ -474,21 +474,21 @@ async function startProxyInBackground(api: OpenClawPluginApi): Promise<void> {
   const currentChain = await resolvePaymentChain();
   const displayAddress =
     currentChain === "solana" && proxy.solanaAddress ? proxy.solanaAddress : wallet.address;
+  const network = currentChain === "solana" ? "Solana" : "Base";
   proxy.balanceMonitor
     .checkBalance()
     .then((balance) => {
       if (balance.isEmpty) {
-        api.logger.info(`Wallet: ${displayAddress} | Balance: $0.00`);
-        api.logger.info(`Using FREE model. Fund wallet for premium models.`);
+        api.logger.info(`Wallet (${network}): ${displayAddress}`);
+        api.logger.info(`Balance: $0.00 — send USDC on ${network} to the address above to unlock paid models.`);
       } else if (balance.isLow) {
-        api.logger.info(`Wallet: ${displayAddress} | Balance: ${balance.balanceUSD} (low)`);
+        api.logger.info(`Wallet (${network}): ${displayAddress} | Balance: ${balance.balanceUSD} (low — top up soon)`);
       } else {
-        api.logger.info(`Wallet: ${displayAddress} | Balance: ${balance.balanceUSD}`);
+        api.logger.info(`Wallet (${network}): ${displayAddress} | Balance: ${balance.balanceUSD}`);
       }
     })
     .catch(() => {
-      // Silently continue - balance will be checked per-request anyway
-      api.logger.info(`Wallet: ${displayAddress} | Balance: (checking...)`);
+      api.logger.info(`Wallet (${network}): ${displayAddress} | Balance: (checking...)`);
     });
 }
 

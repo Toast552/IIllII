@@ -1339,7 +1339,7 @@ export async function startProxy(options: ProxyOptions): Promise<ProxyHandle> {
     const solanaSigner = await createKeyPairSignerFromPrivateKeyBytes(solanaPrivateKeyBytes);
     solanaAddress = solanaSigner.address;
     registerExactSvmScheme(x402, { signer: solanaSigner });
-    console.log(`[ClawRouter] Solana x402 scheme registered: ${solanaAddress}`);
+    console.log(`[ClawRouter] Solana wallet: ${solanaAddress}`);
   }
 
   // Log which chain is used for each payment
