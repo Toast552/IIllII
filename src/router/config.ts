@@ -1039,25 +1039,25 @@ export const DEFAULT_ROUTING_CONFIG: RoutingConfig = {
   },
 
   // Auto (balanced) tier configs - current default smart routing
-  // Benchmark-tuned 2026-03-16: latency-ranked via blockrun.ai x402 end-to-end
+  // Benchmark-tuned 2026-03-16: balancing quality (retention) + latency
   tiers: {
     SIMPLE: {
-      primary: "xai/grok-4-fast-non-reasoning", // 1,143ms, $0.20/$0.50 — fastest overall
+      primary: "google/gemini-2.5-flash", // 1,238ms, 60% retention (best) — fast AND quality
       fallback: [
-        "xai/grok-3-mini", // 1,202ms, $0.30/$0.50
-        "google/gemini-2.5-flash", // 1,238ms, 60% retention (best)
-        "google/gemini-2.5-flash-lite", // 1,353ms, 1M context, ultra cheap ($0.10/$0.40)
         "deepseek/deepseek-chat", // 1,431ms, 41% retention
+        "moonshot/kimi-k2.5", // 1,646ms, strong quality
+        "google/gemini-2.5-flash-lite", // 1,353ms, 1M context, ultra cheap ($0.10/$0.40)
+        "xai/grok-4-fast-non-reasoning", // 1,143ms, $0.20/$0.50 — fast fallback
         "nvidia/gpt-oss-120b", // 1,252ms, FREE fallback
       ],
     },
     MEDIUM: {
-      primary: "xai/grok-4-1-fast-non-reasoning", // 1,244ms, $0.20/$0.50 — fast + tool calling
+      primary: "moonshot/kimi-k2.5", // 1,646ms, $0.60/$3.00 — strong tool use, quality output
       fallback: [
         "deepseek/deepseek-chat", // 1,431ms, 41% retention
-        "moonshot/kimi-k2.5", // 1,646ms, strong tool use quality
         "google/gemini-2.5-flash", // 1,238ms, 60% retention
         "google/gemini-2.5-flash-lite", // 1,353ms, 1M context ($0.10/$0.40)
+        "xai/grok-4-1-fast-non-reasoning", // 1,244ms, fast fallback
         "xai/grok-3-mini", // 1,202ms, $0.30/$0.50
       ],
     },
@@ -1157,11 +1157,11 @@ export const DEFAULT_ROUTING_CONFIG: RoutingConfig = {
   // Agentic tier configs - models that excel at multi-step autonomous tasks
   agenticTiers: {
     SIMPLE: {
-      primary: "xai/grok-4-1-fast-non-reasoning", // 1,244ms, $0.20/$0.50 — fast tool calling
+      primary: "openai/gpt-4o-mini", // $0.15/$0.60 - best tool compliance at lowest cost
       fallback: [
-        "openai/gpt-4o-mini", // 2,764ms, $0.15/$0.60 - reliable tool compliance
         "moonshot/kimi-k2.5", // 1,646ms, strong tool use quality
         "anthropic/claude-haiku-4.5", // 2,305ms
+        "xai/grok-4-1-fast-non-reasoning", // 1,244ms, fast fallback
       ],
     },
     MEDIUM: {
