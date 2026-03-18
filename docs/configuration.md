@@ -314,6 +314,23 @@ const proxy = await startProxy({
 plugins:
   - id: "@blockrun/clawrouter"
     config:
+      # Maximum spend per session/run in USD.
+      # Default: disabled (no limit)
+      maxCostPerRun: 0.50   # $0.50 per session
+
+      # How to enforce the budget cap. Default: graceful
+      #
+      # graceful (default): when budget runs low, ClawRouter automatically downgrades
+      #   to cheaper models (premium → auto → eco → free). Tasks keep running.
+      #   Only returns an error if no model can serve the request at all.
+      #
+      # strict: immediately returns 429 (X-ClawRouter-Cost-Cap-Exceeded: 1) once
+      #   the session spend reaches the cap. Use when you need a hard budget ceiling.
+      maxCostPerRunMode: graceful   # or: strict
+
+      # Note: image generation endpoints (/v1/images/generations) bypass maxCostPerRun.
+      # Their cost is charged via x402 micropayment directly and is not tracked per-session.
+
       routing:
         # Override tier assignments
         tiers:

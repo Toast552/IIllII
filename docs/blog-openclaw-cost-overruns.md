@@ -24,6 +24,10 @@ OpenClaw is an excellent orchestration framework — session management, tool di
 
 **Cost tier** — A heartbeat status check doesn't need Opus. A file read result doesn't need 128K context. OpenClaw sends both to the same model at the same price.
 
+**Rate limit isolation** — When one provider hits a 429, OpenClaw's failover logic applies that cooldown to the entire profile, not just the offending model. Every model in the same group is penalized ([#49834](https://github.com/openclaw/openclaw/issues/49834)). If you configured 5 models for fallback, one slow provider can block all of them.
+
+**Empty/degraded responses** — Some providers return HTTP 200 with empty content, repeated tokens, or a single newline. OpenClaw passes this through to the agent. The agent either errors out, loops, or silently gets a blank response ([#49902](https://github.com/openclaw/openclaw/issues/49902)).
+
 **Error semantics** — OpenClaw's failover logic has known gaps. We found and fixed two while building ClawRouter:
 
 - **MiniMax HTTP 520** ([PR #49550](https://github.com/openclaw/openclaw/pull/49550)) — MiniMax returns `{"type":"api_error","message":"unknown error, 520 (1000)"}` for transient server errors. OpenClaw's classifier required both `"type":"api_error"` AND the string `"internal server error"`. MiniMax fails the second check. Result: no failover, silent failure, retry storm.
@@ -80,7 +84,17 @@ formal proof, reasoning    →  REASONING →  o3 / claude-opus      (~30¢ / re
 
 The heartbeat that was burning $248/day on Opus routes to Flash at ~1/500th the cost. Same heartbeat feature, working as designed.
 
-### 3. Correct Error Classification — No Retry Storms
+### 3. Per-Model Rate Limit Isolation — No Cross-Contamination
+
+When a provider returns 429, ClawRouter marks that specific model as rate-limited for 60 seconds ([#49834](https://github.com/openclaw/openclaw/issues/49834)). Other models in the fallback chain are unaffected. If Claude Sonnet gets rate-limited, Gemini Flash and GPT-4o continue working. No cascade.
+
+Before failing over, ClawRouter also retries the rate-limited model once after 200ms. Token-bucket limits often recover within milliseconds — most short-burst 429s resolve on the first retry without ever touching a fallback model.
+
+### 4. Empty Response Detection — No Silent Failures
+
+ClawRouter inspects every HTTP 200 response body before forwarding it ([#49902](https://github.com/openclaw/openclaw/issues/49902)). Blank responses, repeated-token loops, and single-character outputs trigger model fallback — the same as a 5xx. The agent never sees a degraded response that would cause it to loop or silently fail.
+
+### 5. Correct Error Classification — No Retry Storms
 
 ClawRouter classifies errors at the HTTP/body layer before OpenClaw sees them:
 
@@ -97,17 +111,19 @@ MiniMax 520 (api_error)→ server_error    → retry with fallback
 
 Per-provider error state is tracked independently. If MiniMax is having a bad hour, Anthropic and OpenAI routes continue working. No cross-contamination, no single provider poisoning the session.
 
-### 4. Session Memory — Agents That Remember
+### 6. Session Memory — Agents That Remember
 
 OpenClaw sessions can be long-lived. ClawRouter maintains a session journal — extracting decisions, results, and context from each turn — and injects relevant history when the agent asks questions that reference earlier work.
 
 Less context repeated = fewer tokens = lower cost. Agents that need to recall earlier decisions don't need to carry the entire history in every prompt.
 
-### 5. x402 Micropayments — Budget by Construction
+### 7. x402 Micropayments — Wallet-Based Budget Control
 
 ClawRouter pays for inference via [x402](https://x402.org/) USDC micropayments (Base or Solana). You load a wallet. Each inference call costs exactly what it costs. When the wallet runs low, requests stop cleanly.
 
-There is no monthly invoice. There is no 3am email. There is a wallet balance, and it either has funds or it doesn't. The cost overrun scenario that burned $248/day is structurally impossible — the wallet would drain and stop, not accumulate.
+There is no monthly invoice. There is no 3am email. There is a wallet balance, and it either has funds or it doesn't. Wallet-based billing means your budget stops the burn — not a monthly invoice that arrives after the damage is done.
+
+**`maxCostPerRun`** — a per-session cost ceiling that stops or downgrades requests once a session exceeds a configured threshold (e.g., `$0.50`). This closes the remaining gap ([#3181](https://github.com/openclaw/openclaw/issues/3181)) where a wallet with sufficient funds can still accumulate within a single run. Two modes: `graceful` (downgrade to cheaper models) and `strict` (hard 429 once the cap is hit).
 
 ```
 41+ models. One wallet. Pay per call.
@@ -122,10 +138,14 @@ There is no monthly invoice. There is no 3am email. There is a wallet balance, a
 | Heartbeat cost overrun | No per-run cap | Tier routing → 50–500× cheaper model |
 | Large context | Full context every call | 7-layer compression, 15–40% reduction |
 | Tool result bloat | Raw output forwarded | Observation compression, up to 97% |
+| Rate limit contaminates profile | All models penalized (#49834) | Per-model 60s cooldown, others unaffected |
+| Empty / degraded 200 response | Passed through to agent (#49902) | Detected, triggers model fallback |
+| Short-burst 429 failover | Immediate failover to next model | 200ms retry first, failover only if needed |
 | MiniMax 520 failure | Silent drop / retry storm | Classified as server_error, retried correctly |
 | Z.ai 1311 (billing) | Treated as rate_limit, retried | Classified as billing, stopped immediately |
 | Mid-task model switch | Model can change mid-session | Session pinning, consistent model per task |
 | Monthly billing surprise | Possible | Wallet-based, stops when empty |
+| Per-session cost ceiling | None | `maxCostPerRun` — graceful or strict cap |
 | Cost visibility | None | `/stats` with per-provider error counts |
 
 ---
