@@ -175,12 +175,7 @@ npm install -g @blockrun/clawrouter
 clawrouter init
 ```
 
-Point OpenClaw at `http://localhost:3729`. Your existing config, tools, sessions, and extensions are unchanged.
-
-```yaml
-# ~/.openclaw/config.yaml
-apiBaseUrl: http://localhost:3729/v1
-```
+ClawRouter auto-injects itself into `~/.openclaw/openclaw.json` as a provider on startup. No manual config needed — your existing tools, sessions, and extensions are unchanged.
 
 Load a wallet, choose a model profile (`eco` / `auto` / `premium` / `agentic`), and run.
 
