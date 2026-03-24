@@ -80,12 +80,16 @@ import { buildPartnerTools, PARTNER_SERVICES } from "./partners/index.js";
 /**
  * Install ClawRouter skills into OpenClaw's workspace skills directory.
  *
- * OpenClaw discovers skills by scanning {workspaceDir}/skills/ for SKILL.md files.
- * Since there's no `api.registerSkill()`, we copy our bundled skills into the
- * workspace so OpenClaw can find them. Each skill is namespaced under
- * `skills/blockrun-{skillName}/` to avoid collisions with other plugins.
+ * OpenClaw agents discover skills by scanning {workspaceDir}/skills/ for SKILL.md
+ * files. While the plugin manifest (`openclaw.plugin.json`) exposes skills for
+ * OpenClaw's internal registry, agents often try to read skills from the workspace
+ * path directly. This copies our bundled skills so they're always resolvable.
  *
- * Only copies if the skill is missing or the version has changed.
+ * Workspace path follows OpenClaw's convention:
+ *   - Default: ~/.openclaw/workspace/skills/
+ *   - With profile: ~/.openclaw/workspace-{profile}/skills/
+ *
+ * Only copies if the skill is missing or the content has changed.
  */
 function installSkillsToWorkspace(logger: { info: (msg: string) => void; warn: (msg: string) => void }) {
   try {
@@ -98,7 +102,12 @@ function installSkillsToWorkspace(logger: { info: (msg: string) => void; warn: (
       return;
     }
 
-    const workspaceSkillsDir = join(homedir(), ".openclaw", "skills");
+    // Match OpenClaw's workspace resolution: ~/.openclaw/workspace[-{profile}]/
+    const profile = (process["env"].OPENCLAW_PROFILE ?? "").trim().toLowerCase();
+    const workspaceDirName = profile && profile !== "default"
+      ? `workspace-${profile}`
+      : "workspace";
+    const workspaceSkillsDir = join(homedir(), ".openclaw", workspaceDirName, "skills");
     mkdirSync(workspaceSkillsDir, { recursive: true });
 
     // Scan bundled skills: each subdirectory contains a SKILL.md
@@ -112,8 +121,8 @@ function installSkillsToWorkspace(logger: { info: (msg: string) => void; warn: (
       const srcSkillFile = join(bundledSkillsDir, skillName, "SKILL.md");
       if (!existsSync(srcSkillFile)) continue;
 
-      // Namespace: blockrun-{skillName} to avoid collisions
-      const destDir = join(workspaceSkillsDir, `blockrun-${skillName}`);
+      // Use original skill name as folder (matches what agents expect)
+      const destDir = join(workspaceSkillsDir, skillName);
       const destSkillFile = join(destDir, "SKILL.md");
 
       // Check if update needed: compare content
