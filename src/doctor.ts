@@ -274,7 +274,9 @@ function printDiagnostics(result: DiagnosticResult): void {
     const chainLabel = result.wallet.paymentChain === "solana" ? "Solana" : "Base";
     console.log(`  ${green(`Chain: ${chainLabel}`)}`);
     if (result.wallet.isEmpty) {
-      console.log(`  ${red(`Balance: $0.00 - NEED TO FUND WITH USDC ON ${chainLabel.toUpperCase()}!`)}`);
+      console.log(
+        `  ${red(`Balance: $0.00 - NEED TO FUND WITH USDC ON ${chainLabel.toUpperCase()}!`)}`,
+      );
       if (result.wallet.paymentChain === "base" && result.wallet.solanaAddress) {
         console.log(`  ${yellow(`Tip: funded Solana instead? Run /wallet solana to switch`)}`);
       }

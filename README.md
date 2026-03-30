@@ -92,6 +92,7 @@ Done. Smart routing (`blockrun/auto`) is now your default model.
 No OpenClaw required. ClawRouter runs as a local proxy on port 8402.
 
 **1. Start the proxy**
+
 ```bash
 npx @blockrun/clawrouter
 ```
@@ -139,6 +140,7 @@ Both `provider: openai` and `provider: clawrouter` work — just make sure `apiB
   ]
 }
 ```
+
 </details>
 </details>
 
@@ -146,6 +148,7 @@ Both `provider: openai` and `provider: clawrouter` work — just make sure `apiB
 <summary><strong>Cursor</strong> — Settings → Models → OpenAI-compatible</summary>
 
 Set base URL to `http://localhost:8402`, API key to `x402`, model to `blockrun/auto`.
+
 </details>
 
 <details>
@@ -156,6 +159,7 @@ from openai import OpenAI
 client = OpenAI(base_url="http://localhost:8402", api_key="x402")
 response = client.chat.completions.create(model="blockrun/auto", messages=[...])
 ```
+
 </details>
 
 ---
@@ -513,14 +517,14 @@ Run Claude Code with 50+ models, no rate limits, no Anthropic account, no phone 
 
 ### Blog
 
-| Article | Topic |
-| ------- | ----- |
-| [11 Free AI Models, Zero Cost](docs/11-free-ai-models-zero-cost-blockrun.md) | How BlockRun gives developers top-tier LLMs for nothing |
-| [ClawRouter Cuts LLM API Costs 500×](docs/clawrouter-cuts-llm-api-costs-500x.md) | Deep dive into cost savings |
-| [ClawRouter vs OpenRouter](docs/clawrouter-vs-openrouter-llm-routing-comparison.md) | Head-to-head comparison |
-| [Smart LLM Router: 14-Dimension Classifier](docs/smart-llm-router-14-dimension-classifier.md) | How the routing engine works |
-| [LLM Router Benchmark: 46 Models, Sub-1ms](docs/llm-router-benchmark-46-models-sub-1ms-routing.md) | Performance benchmarks |
-| [Anthropic Cost Savings](docs/anthropic-cost-savings.md) | Reducing Claude API spend |
+| Article                                                                                            | Topic                                                   |
+| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| [11 Free AI Models, Zero Cost](docs/11-free-ai-models-zero-cost-blockrun.md)                       | How BlockRun gives developers top-tier LLMs for nothing |
+| [ClawRouter Cuts LLM API Costs 500×](docs/clawrouter-cuts-llm-api-costs-500x.md)                   | Deep dive into cost savings                             |
+| [ClawRouter vs OpenRouter](docs/clawrouter-vs-openrouter-llm-routing-comparison.md)                | Head-to-head comparison                                 |
+| [Smart LLM Router: 14-Dimension Classifier](docs/smart-llm-router-14-dimension-classifier.md)      | How the routing engine works                            |
+| [LLM Router Benchmark: 46 Models, Sub-1ms](docs/llm-router-benchmark-46-models-sub-1ms-routing.md) | Performance benchmarks                                  |
+| [Anthropic Cost Savings](docs/anthropic-cost-savings.md)                                           | Reducing Claude API spend                               |
 
 ---
 

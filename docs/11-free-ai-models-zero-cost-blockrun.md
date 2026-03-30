@@ -18,19 +18,19 @@ BlockRun's answer: just take them.
 
 Through [ClawRouter](https://github.com/blockrunai/ClawRouter) — BlockRun's local AI routing proxy — you get zero-cost access to the following:
 
-| Model | Parameters | Context | Reasoning | Best For |
-|-------|-----------|---------|-----------|----------|
-| **GPT-OSS 120B** | 120B | 128K | — | General chat, summaries, formatting |
-| **GPT-OSS 20B** | 20B | 128K | — | Fast lightweight tasks |
-| **Nemotron Ultra 253B** | 253B | 131K | ✅ | Complex reasoning, math, analysis |
-| **Nemotron 3 Super 120B** | 120B | 131K | ✅ | Balanced reasoning + general |
-| **Nemotron Super 49B** | 49B | 131K | ✅ | Quick reasoning, low latency |
-| **DeepSeek V3.2** | — | 128K | ✅ | Code generation, technical reasoning |
-| **Mistral Large 675B** | 675B | 128K | ✅ | Multilingual, long-form, complex instructions |
-| **Qwen3 Coder 480B** | 480B | 128K | — | Professional code generation |
-| **Devstral 2 123B** | 123B | 128K | — | Developer tooling, code review |
-| **GLM-4.7** | — | 128K | ✅ | Chinese-English bilingual reasoning |
-| **Llama 4 Maverick** | — | 128K | ✅ | Meta's latest open-source all-rounder |
+| Model                     | Parameters | Context | Reasoning | Best For                                      |
+| ------------------------- | ---------- | ------- | --------- | --------------------------------------------- |
+| **GPT-OSS 120B**          | 120B       | 128K    | —         | General chat, summaries, formatting           |
+| **GPT-OSS 20B**           | 20B        | 128K    | —         | Fast lightweight tasks                        |
+| **Nemotron Ultra 253B**   | 253B       | 131K    | ✅        | Complex reasoning, math, analysis             |
+| **Nemotron 3 Super 120B** | 120B       | 131K    | ✅        | Balanced reasoning + general                  |
+| **Nemotron Super 49B**    | 49B        | 131K    | ✅        | Quick reasoning, low latency                  |
+| **DeepSeek V3.2**         | —          | 128K    | ✅        | Code generation, technical reasoning          |
+| **Mistral Large 675B**    | 675B       | 128K    | ✅        | Multilingual, long-form, complex instructions |
+| **Qwen3 Coder 480B**      | 480B       | 128K    | —         | Professional code generation                  |
+| **Devstral 2 123B**       | 123B       | 128K    | —         | Developer tooling, code review                |
+| **GLM-4.7**               | —          | 128K    | ✅        | Chinese-English bilingual reasoning           |
+| **Llama 4 Maverick**      | —          | 128K    | ✅        | Meta's latest open-source all-rounder         |
 
 **Price: $0.00 per million tokens. Input free. Output free. No hidden fees. No daily caps. No trial period.**
 
@@ -56,30 +56,31 @@ ClawRouter's value proposition isn't just "here are free models." It's **intelli
 
 ClawRouter classifies every incoming request into one of four complexity tiers:
 
-| Tier | Typical Tasks | ECO Route (Cheapest) | AUTO Route (Balanced) |
-|------|--------------|---------------------|----------------------|
-| **SIMPLE** | Formatting, translation, Q&A | 🆓 GPT-OSS 120B (FREE) | GPT-4o Mini |
-| **MEDIUM** | Summaries, analysis, general coding | 🆓 DeepSeek V3.2 (FREE) | DeepSeek V3.2 |
-| **COMPLEX** | Architecture, complex code | 🆓 Nemotron Ultra 253B (FREE) | Claude Sonnet 4 |
-| **REASONING** | Mathematical proofs, multi-step logic | DeepSeek R1 | Claude Opus 4 |
+| Tier          | Typical Tasks                         | ECO Route (Cheapest)          | AUTO Route (Balanced) |
+| ------------- | ------------------------------------- | ----------------------------- | --------------------- |
+| **SIMPLE**    | Formatting, translation, Q&A          | 🆓 GPT-OSS 120B (FREE)        | GPT-4o Mini           |
+| **MEDIUM**    | Summaries, analysis, general coding   | 🆓 DeepSeek V3.2 (FREE)       | DeepSeek V3.2         |
+| **COMPLEX**   | Architecture, complex code            | 🆓 Nemotron Ultra 253B (FREE) | Claude Sonnet 4       |
+| **REASONING** | Mathematical proofs, multi-step logic | DeepSeek R1                   | Claude Opus 4         |
 
 Look at the ECO column. **Three out of four tiers route to free models.** Unless you're doing the hardest reasoning tasks, your daily work costs nothing.
 
 ### Real-World Cost Comparison
 
 Assume 100 requests per day, distributed roughly as:
+
 - 40% SIMPLE (chat, translation, formatting)
 - 30% MEDIUM (coding, analysis)
 - 20% COMPLEX (architecture, deep debugging)
 - 10% REASONING (math, formal logic)
 
-| Approach | Estimated Monthly Cost |
-|----------|----------------------|
-| Pure Claude Opus 4 | ~$75–150 |
-| Pure GPT-4o | ~$15–30 |
-| ClawRouter AUTO mode | ~$5–10 |
-| ClawRouter ECO mode | ~$1–3 |
-| Manual free model selection | **$0** |
+| Approach                    | Estimated Monthly Cost |
+| --------------------------- | ---------------------- |
+| Pure Claude Opus 4          | ~$75–150               |
+| Pure GPT-4o                 | ~$15–30                |
+| ClawRouter AUTO mode        | ~$5–10                 |
+| ClawRouter ECO mode         | ~$1–3                  |
+| Manual free model selection | **$0**                 |
 
 **ECO mode saves 92%+ compared to Claude Opus alone.**
 
@@ -273,4 +274,4 @@ Go build something.
 
 ---
 
-*Based on ClawRouter v0.12.84. Model availability may change with future releases. For the latest information, visit [blockrun.ai](https://blockrun.ai).*
+_Based on ClawRouter v0.12.84. Model availability may change with future releases. For the latest information, visit [blockrun.ai](https://blockrun.ai)._
