@@ -51252,7 +51252,10 @@ var PROVIDER_ERROR_PATTERNS = [
   /payload too large/i,
   /payment.*verification.*failed/i,
   /model.*not.*allowed/i,
-  /unknown.*model/i
+  /unknown.*model/i,
+  /reasoning_content.*missing/i,
+  // Thinking model multi-turn: missing reasoning_content → fallback
+  /thinking.*reasoning_content/i
 ];
 var DEGRADED_RESPONSE_PATTERNS = [
   /the ai service is temporarily overloaded/i,
@@ -51472,13 +51475,8 @@ function normalizeMessagesForThinking(messages) {
     if (msg.role !== "assistant" || msg.reasoning_content !== void 0) {
       return msg;
     }
-    const hasOpenAIToolCalls = msg.tool_calls && Array.isArray(msg.tool_calls) && msg.tool_calls.length > 0;
-    const hasAnthropicToolUse = Array.isArray(msg.content) && msg.content.some((block) => block?.type === "tool_use");
-    if (hasOpenAIToolCalls || hasAnthropicToolUse) {
-      hasChanges = true;
-      return { ...msg, reasoning_content: "" };
-    }
-    return msg;
+    hasChanges = true;
+    return { ...msg, reasoning_content: "" };
   });
   return hasChanges ? normalized : messages;
 }
@@ -53709,7 +53707,13 @@ data: [DONE]
         let errPayload;
         try {
           const parsed = JSON.parse(transformedErr);
-          errPayload = JSON.stringify(parsed);
+          if (parsed && typeof parsed === "object" && "error" in parsed) {
+            errPayload = JSON.stringify(parsed);
+          } else {
+            errPayload = JSON.stringify({
+              error: { message: rawErrBody, type: "provider_error", status: errStatus }
+            });
+          }
         } catch {
           errPayload = JSON.stringify({
             error: { message: rawErrBody, type: "provider_error", status: errStatus }

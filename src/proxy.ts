@@ -585,6 +585,8 @@ const PROVIDER_ERROR_PATTERNS = [
   /payment.*verification.*failed/i,
   /model.*not.*allowed/i,
   /unknown.*model/i,
+  /reasoning_content.*missing/i, // Thinking model multi-turn: missing reasoning_content → fallback
+  /thinking.*reasoning_content/i,
 ];
 
 /**
@@ -945,9 +947,20 @@ type ExtendedChatMessage = ChatMessage & {
 
 /**
  * Normalize messages for thinking-enabled requests.
- * When thinking/extended_thinking is enabled, assistant messages with tool_calls
+ * When thinking/extended_thinking is enabled, ALL assistant messages in history
  * must have reasoning_content (can be empty string if not present).
- * Error: "400 thinking is enabled but reasoning_content is missing in assistant tool call message"
+ *
+ * Reasoning models like Kimi K2.5, DeepSeek-R1, etc. strip their thinking tokens
+ * before we forward the response to the client. So when the client sends back the
+ * assistant message in a follow-up turn, it lacks reasoning_content. These models
+ * reject the multi-turn history with 400 if any assistant message is missing it.
+ *
+ * Previously only tool-call messages were patched — this missed plain text assistant
+ * messages, causing 100% failures on existing (multi-turn) chats.
+ *
+ * Error examples:
+ *   "400 thinking is enabled but reasoning_content is missing in assistant tool call message"
+ *   "400 thinking is enabled but reasoning_content is missing in assistant message"
  */
 function normalizeMessagesForThinking(messages: ExtendedChatMessage[]): ExtendedChatMessage[] {
   if (!messages || messages.length === 0) return messages;
@@ -959,20 +972,10 @@ function normalizeMessagesForThinking(messages: ExtendedChatMessage[]): Extended
       return msg;
     }
 
-    // Check for OpenAI format: tool_calls array
-    const hasOpenAIToolCalls =
-      msg.tool_calls && Array.isArray(msg.tool_calls) && msg.tool_calls.length > 0;
-
-    // Check for Anthropic format: content array with tool_use blocks
-    const hasAnthropicToolUse =
-      Array.isArray(msg.content) &&
-      (msg.content as Array<{ type?: string }>).some((block) => block?.type === "tool_use");
-
-    if (hasOpenAIToolCalls || hasAnthropicToolUse) {
-      hasChanges = true;
-      return { ...msg, reasoning_content: "" };
-    }
-    return msg;
+    // Add reasoning_content: "" to ALL assistant messages.
+    // Reasoning models require it on every assistant turn in history, not just tool-call turns.
+    hasChanges = true;
+    return { ...msg, reasoning_content: "" };
   });
 
   return hasChanges ? normalized : messages;
@@ -2352,7 +2355,7 @@ async function tryModelRequest(
       parsed.messages = normalizeMessagesForGoogle(parsed.messages as ChatMessage[]);
     }
 
-    // Normalize messages for thinking-enabled requests (add reasoning_content to tool calls)
+    // Normalize messages for thinking-enabled requests (add reasoning_content to all assistant messages)
     // Check request flags AND target model - reasoning models have thinking enabled server-side
     const hasThinkingEnabled = !!(
       parsed.thinking ||
@@ -4146,12 +4149,23 @@ async function proxyRequest(
       const transformedErr = transformPaymentError(rawErrBody);
 
       if (headersSentEarly) {
-        // Streaming: send error as SSE event
-        // If transformed error is already JSON, parse and use it; otherwise wrap in standard format
+        // Streaming: send error as SSE event in OpenAI error format.
+        // The OpenAI SDK (used by continue.dev and others) expects {"error": {...}}.
+        // If the upstream error is already in that shape, use it; otherwise wrap it.
+        // Sending raw upstream JSON (e.g. {"code":400,"message":"..."}) causes the SDK
+        // to throw a generic "Unexpected error" instead of a meaningful message.
         let errPayload: string;
         try {
           const parsed = JSON.parse(transformedErr);
-          errPayload = JSON.stringify(parsed);
+          if (parsed && typeof parsed === "object" && "error" in parsed) {
+            // Already has the correct {"error": {...}} wrapper — use as-is
+            errPayload = JSON.stringify(parsed);
+          } else {
+            // Raw upstream JSON without error wrapper — wrap it
+            errPayload = JSON.stringify({
+              error: { message: rawErrBody, type: "provider_error", status: errStatus },
+            });
+          }
         } catch {
           errPayload = JSON.stringify({
             error: { message: rawErrBody, type: "provider_error", status: errStatus },
