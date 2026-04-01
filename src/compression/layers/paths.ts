@@ -8,7 +8,7 @@
  * Expected savings: 1-3%
  */
 
-import { NormalizedMessage } from "../types";
+import { NormalizedMessage } from "../types.js";
 
 export interface PathShorteningResult {
   messages: NormalizedMessage[];

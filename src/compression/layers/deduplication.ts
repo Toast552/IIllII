@@ -8,7 +8,7 @@
  * Expected savings: 2-5%
  */
 
-import { NormalizedMessage } from "../types";
+import { NormalizedMessage } from "../types.js";
 import crypto from "crypto";
 
 export interface DeduplicationResult {

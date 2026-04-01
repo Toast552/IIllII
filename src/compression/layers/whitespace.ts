@@ -7,7 +7,7 @@
  * Expected savings: 3-8%
  */
 
-import { NormalizedMessage } from "../types";
+import { NormalizedMessage } from "../types.js";
 
 export interface WhitespaceResult {
   messages: NormalizedMessage[];

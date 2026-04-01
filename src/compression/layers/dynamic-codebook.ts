@@ -8,7 +8,7 @@
  * Finds phrases that appear 3+ times and replaces with short codes.
  */
 
-import { NormalizedMessage } from "../types";
+import { NormalizedMessage } from "../types.js";
 
 interface DynamicCodebookResult {
   messages: NormalizedMessage[];

@@ -8,7 +8,7 @@
  * only ~200 chars of actual useful information.
  */
 
-import { NormalizedMessage } from "../types";
+import { NormalizedMessage } from "../types.js";
 
 interface ObservationResult {
   messages: NormalizedMessage[];

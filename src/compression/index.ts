@@ -16,18 +16,18 @@ import {
   CompressionResult,
   CompressionStats,
   DEFAULT_COMPRESSION_CONFIG,
-} from "./types";
-import { deduplicateMessages } from "./layers/deduplication";
-import { normalizeMessagesWhitespace } from "./layers/whitespace";
-import { encodeMessages } from "./layers/dictionary";
-import { shortenPaths } from "./layers/paths";
-import { compactMessagesJson } from "./layers/json-compact";
-import { compressObservations } from "./layers/observation";
-import { applyDynamicCodebook, generateDynamicCodebookHeader } from "./layers/dynamic-codebook";
-import { generateCodebookHeader, STATIC_CODEBOOK } from "./codebook";
+} from "./types.js";
+import { deduplicateMessages } from "./layers/deduplication.js";
+import { normalizeMessagesWhitespace } from "./layers/whitespace.js";
+import { encodeMessages } from "./layers/dictionary.js";
+import { shortenPaths } from "./layers/paths.js";
+import { compactMessagesJson } from "./layers/json-compact.js";
+import { compressObservations } from "./layers/observation.js";
+import { applyDynamicCodebook, generateDynamicCodebookHeader } from "./layers/dynamic-codebook.js";
+import { generateCodebookHeader, STATIC_CODEBOOK } from "./codebook.js";
 
-export * from "./types";
-export { STATIC_CODEBOOK } from "./codebook";
+export * from "./types.js";
+export { STATIC_CODEBOOK } from "./codebook.js";
 
 /**
  * Calculate total character count for messages.

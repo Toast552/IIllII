@@ -8,8 +8,8 @@
  * Expected savings: 4-8%
  */
 
-import { NormalizedMessage } from "../types";
-import { getInverseCodebook } from "../codebook";
+import { NormalizedMessage } from "../types.js";
+import { getInverseCodebook } from "../codebook.js";
 
 export interface DictionaryResult {
   messages: NormalizedMessage[];

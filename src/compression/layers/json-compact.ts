@@ -8,7 +8,7 @@
  * Expected savings: 2-4%
  */
 
-import { NormalizedMessage, ToolCall } from "../types";
+import { NormalizedMessage, ToolCall } from "../types.js";
 
 export interface JsonCompactResult {
   messages: NormalizedMessage[];
