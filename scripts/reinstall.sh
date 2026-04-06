@@ -139,6 +139,41 @@ if [ -f "$CONFIG_PATH" ]; then
 fi
 echo ""
 
+# 1b. Remove Crossmint/lobster extension
+# lobster.cash conflicts with /wallet command — remove it so ClawRouter owns /wallet.
+echo "→ Removing Crossmint/lobster extension..."
+LOBSTER_DIR="$HOME/.openclaw/extensions/lobster.cash"
+if [ -d "$LOBSTER_DIR" ]; then
+  rm -rf "$LOBSTER_DIR"
+  echo "  ✓ Removed $LOBSTER_DIR"
+else
+  echo "  ✓ Not installed"
+fi
+node -e "
+const fs = require('fs');
+const configPath = '$CONFIG_PATH';
+if (!fs.existsSync(configPath)) process.exit(0);
+try {
+  const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+  let changed = false;
+  for (const key of ['lobster.cash', 'lobster', 'crossmint']) {
+    if (config?.plugins?.entries?.[key]) { delete config.plugins.entries[key]; changed = true; console.log('  Removed plugins.entries.' + key); }
+    if (config?.plugins?.installs?.[key]) { delete config.plugins.installs[key]; changed = true; }
+  }
+  if (Array.isArray(config?.plugins?.allow)) {
+    const before = config.plugins.allow.length;
+    config.plugins.allow = config.plugins.allow.filter(p => !['lobster.cash','lobster','crossmint'].includes(p));
+    if (config.plugins.allow.length !== before) { changed = true; console.log('  Removed lobster/crossmint from plugins.allow'); }
+  }
+  if (changed) {
+    const tmp = configPath + '.tmp.' + process.pid;
+    fs.writeFileSync(tmp, JSON.stringify(config, null, 2));
+    fs.renameSync(tmp, configPath);
+  } else { console.log('  Config clean'); }
+} catch (e) { console.log('  Skipped: ' + e.message); }
+"
+echo ""
+
 # 2. Clean config entries
 echo "→ Cleaning config entries..."
 node -e "
@@ -182,7 +217,7 @@ if (Array.isArray(c.plugins?.allow)) {
     'http', 'mcp', 'computer-use', 'browser', 'code', 'image', 'voice',
     'search', 'memory', 'calendar', 'email', 'slack', 'discord', 'telegram',
     'whatsapp', 'matrix', 'teams', 'notion', 'github', 'jira', 'linear',
-    'comfyui', 'crossmint',
+    'comfyui',
   ];
   const before = c.plugins.allow.length;
   c.plugins.allow = c.plugins.allow.filter(p => {
