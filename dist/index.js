@@ -81300,9 +81300,15 @@ var plugin = {
       );
     }
     api.registerCommand(createWalletCommand(api));
+    try {
+      const walletAlias = createWalletCommand(api);
+      walletAlias.name = "wallet";
+      api.registerCommand(walletAlias);
+    } catch {
+    }
     api.registerCommand(createStatsCommand());
     api.registerCommand(createExcludeCommand());
-    api.logger.info("Commands registered: /blockrun, /stats, /exclude");
+    api.logger.info("Commands registered: /blockrun, /wallet, /stats, /exclude");
     api.registerService({
       id: "clawrouter-proxy",
       start: () => {

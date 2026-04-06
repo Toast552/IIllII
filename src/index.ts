@@ -1404,12 +1404,20 @@ const plugin: OpenClawPluginDefinition = {
     // Register commands synchronously so OpenClaw sees them during the register() call.
     // These factories are plain functions (no top-level await) — marking them async
     // caused .then() callbacks to fire after register() returned, making OpenClaw miss them.
-    // NOTE: command name is "blockrun" (not "wallet") to avoid conflict with
-    // the Crossmint/lobster built-in plugin which already claims "wallet".
     api.registerCommand(createWalletCommand(api));
+    // Also register /wallet alias — ClawRouter loads before Crossmint/lobster in gateway mode,
+    // so we claim "wallet" first. If another plugin already holds it, registration is silently
+    // ignored and /blockrun still works.
+    try {
+      const walletAlias = createWalletCommand(api);
+      walletAlias.name = "wallet";
+      api.registerCommand(walletAlias);
+    } catch {
+      // Silently ignored if "wallet" is already claimed
+    }
     api.registerCommand(createStatsCommand());
     api.registerCommand(createExcludeCommand());
-    api.logger.info("Commands registered: /blockrun, /stats, /exclude");
+    api.logger.info("Commands registered: /blockrun, /wallet, /stats, /exclude");
 
     // Register a service with stop() for cleanup on gateway shutdown
     // This prevents EADDRINUSE when the gateway restarts
